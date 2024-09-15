@@ -9,13 +9,15 @@ import wind from '../app/public/icons/wind.svg'
 import tempMin from '../app/public/icons/temp-min.svg'
 import tempMax from '../app/public/icons/temp-max.svg'
 import clear from '../app/public/icons/clear.svg'
-import sunrise from '../app/public/icons/sunrise.svg'
+import mist from '../app/public/icons/mist.svg'
 import visibility from '../app/public/icons/visibility.svg'
 import clouds from '../app/public/icons/clouds.svg'
 import drizzle from '../app/public/icons/drizzle.svg'
 import thunderstorm from '../app/public/icons/thunderstorm.svg'
 import snow from '../app/public/icons/snow.svg'
 import rain from '../app/public/icons/rain.svg'
+import useIntersectionObserver from './hooks/useInterSectionObserver';
+
 
 
 
@@ -25,7 +27,21 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [weather, setWeather] = useState([]);
   const [error, setError] = useState([]);
-  const apiKey = "40fa755c9a24007a9e44a697310fae37"
+  const apiKey = "40fa755c9a24007a9e44a697310fae37";
+
+  const FadeInSection = ({ children }) => {
+    const [isVisible, elementRef] = useIntersectionObserver();
+
+    return (
+      <div
+        ref={elementRef}
+        className={`fade-in ${isVisible ? 'visible' : ''}`}
+      >
+        {children}
+      </div>
+    );
+  };
+
 
   useEffect(() => {
     // Fungsi untuk mengambil koordinat pengguna
@@ -105,8 +121,10 @@ export default function Home() {
         return rain;
       case 'Snow':
         return snow;
+      case 'Mist':
+        return mist;
       default:
-        return sunrise; // Fallback icon
+        return clear; // Fallback icon
     }
   };
 
@@ -134,68 +152,73 @@ export default function Home() {
               width={2000}
               className="inset-0 w-[1500px] h-[400px] object-cover rounded"
             />
-            <div className="absolute top-5 left-5">
-              <div className="flex w-full justify-between gap-5">
-                <form onSubmit={handleSearch} className="flex justify-center items-center gap-4">
+            <div className="absolute z-10 top-5 left-5">
+              <div className="flex w-screen justify-between gap-5">
+                <form onSubmit={handleSearch} className="flex justify-between items-center gap-4">
                   <input type="text"
                     placeholder="Search locations"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-transparent outline-none text-white text-3xl placeholder-gray-400"/>
-                  <button type="submit" className="border text-white px-4 py-2 rounded-lg">Search</button>
+                    className="bg-transparent outline-none text-white text-lg md:text-3xl placeholder-gray-400"/>
+                  <button type="submit" className="border text-white md:px-4 md:py-2 rounded-lg">Search</button>
                 </form>
               </div>
             </div>
             {/* Current Location */}
             <div className="absolute top-10 right-10 text-white flex flex-col justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-white text-right">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 md:size-12 text-white text-right">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
               </svg>
               <h3 className="text-xl">{weather.name}, {weather.sys ? weather.sys.country : ''}</h3>
             </div>
-            <div className="bg-white/20 backdrop-blur-xl flex w-full h-36 rounded-bl rounded-br flex-wrap divide-y md:flex-nowrap md:divide-x md:divide-y-0 overflow-auto">
-              <div className="w-2/6 flex justify-center items-center gap-8 p-4">
-                <div className="flex flex-col flex-shrink-0">
-                  <h1 className="text-center text-5xl font-normal text-white">{weather.main ? Math.round(weather.main.temp) : ''}<sup className="text-3xl">°C</sup></h1>
-                  <p className="capitalize text-white text-lg">Feels like: {weather.main ? Math.round(weather.main.feels_like) : ''} <sup className="text-sm">°C</sup></p>
-                </div>
-                {weather && weather.weather && weather.weather.length > 0 && (
-                  <div className="flex flex-col flex-shrink-0 justify-center items-center">
-                    {/* Check if weather and weather.weather[0] exist before accessing them */}
-                    <Image
-                      src={getWeatherIcon(weather.weather[0].main)}
-                      alt={weather.weather[0].main}
-                      className="w-12"
-                      width={100}
-                      height={100}
-                    />
-                    <p className="capitalize text-white text-lg">{weather.weather ? weather.weather[0].description : ''}</p>
+            {/* Weather Details */}
+            <div className="bg-white/20 md:backdrop-blur-xl absolute top-0 md:relative h-full flex md:flex-row flex-col items-center w-full md:h-36 rounded-bl rounded-br divide-y md:divide-x md:divide-y-0 overflow-y-auto">
+              <div className="md:w-2/6 md:mt-0 mt-16 flex justify-center items-center gap-8 p-4">
+              {/* <FadeInSection> */}
+                <div className="md:flex-row flex-col flex gap-4">
+                  <div className="w-[150px] text-center flex justify-center flex-col flex-shrink-0">
+                    <h1 className="text-center text-5xl font-normal text-white">{weather.main ? Math.round(weather.main.temp) : ''}<sup className="text-3xl">°C</sup></h1>
+                    <p className="capitalize text-white text-lg">Feels like: {weather.main ? Math.round(weather.main.feels_like) : ''} <sup className="text-sm">°C</sup></p>
                   </div>
-                )}
+                  {weather && weather.weather && weather.weather.length > 0 && (
+                    <div className="w-[150px] text-center flex flex-col flex-shrink-0 justify-center items-center">
+                      {/* Check if weather and weather.weather[0] exist before accessing them */}
+                      <Image
+                        src={getWeatherIcon(weather.weather[0].main)}
+                        alt={weather.weather[0].main}
+                        className="w-12"
+                        width={100}
+                        height={100}
+                      />
+                      <p className="capitalize text-white text-lg">{weather.weather ? weather.weather[0].description : ''}</p>
+                    </div>
+                  )}
+                </div>
+              {/* </FadeInSection> */}
               </div>
-              <div className="w-4/6 flex justify-between md:divide-x md:divide-y-0">
-                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+              <div className="md:w-4/6 w-full md:flex grid grid-cols-2 place-items-center gap-5 flex-col md:flex-row items-center justify-between md:divide-x md:divide-y-0">
+                <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
                   <span className="text-white">Min. Temp</span>
                   <Image src={tempMin} className="w-10" alt="alt"/>
                   <span className="text-white text-md font-semibold">{ weather.main ? Math.round(weather.main.temp_min) : '' } <sup className="text-md">°C</sup></span>
                 </div>
-                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
                   <span className="text-white">Max. Temp</span>
                   <Image src={tempMax} className="w-10" alt="alt"/>
                   <span className="text-white text-md font-semibold">{ weather.main ? Math.round(weather.main.temp_max) : '' } <sup className="text-md">°C</sup></span>
                 </div>
-                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
                   <span className="text-white">Wind</span>
                   <Image src={wind} className="w-10" alt="alt"/>
                   <span className="text-white text-md font-semibold">{weather.wind ? convertToMph(weather.wind.speed) : ''}mph / {weather.wind ? weather.wind.deg : ''}°</span>
                 </div>
-                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
                   <span className="text-white">Humidity</span>
                   <Image src={humidity} className="w-10" alt="alt"/>
                   <span className="text-white text-md font-semibold">{ weather.main ? weather.main.humidity : '' }%</span>
                 </div>
-                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
                   <span className="text-white">Visibility</span>
                   <Image src={visibility} className="w-10" alt="alt"/>
                   <span className="text-white text-md font-semibold">{ weather.main ? parseInt(weather.visibility / 1000) : '' } km</span>
