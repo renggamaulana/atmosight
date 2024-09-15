@@ -1,33 +1,151 @@
+"use client"
+
 import Image from "next/image";
+import { useState, useEffect } from 'react';
 import sky from "../app/public/images/sky.jpg"
 import weather from "../app/public/images/weather1.jpg"
 import weather2 from "../app/public/images/weather2.jpg"
+import axios from "axios";
+import humidity from '../app/public/icons/humidity.svg'
+import wind from '../app/public/icons/wind.svg'
+import tempMin from '../app/public/icons/temp-min.svg'
+import tempMax from '../app/public/icons/temp-max.svg'
+import clear from '../app/public/icons/clear.svg'
+import sunrise from '../app/public/icons/sunrise.svg'
+import visibility from '../app/public/icons/visibility.svg'
+import clouds from '../app/public/icons/clouds.svg'
+import drizzle from '../app/public/icons/drizzle.svg'
+import thunderstorm from '../app/public/icons/thunderstorm.svg'
+import snow from '../app/public/icons/snow.svg'
+import rain from '../app/public/icons/rain.svg'
+
+
 
 export default function Home() {
+
+  const [city, setCity] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [weather, setWeather] = useState([]);
+  const [error, setError] = useState([]);
+  const apiKey = "40fa755c9a24007a9e44a697310fae37"
+
+  useEffect(() => {
+    // Fungsi untuk mengambil koordinat pengguna
+    const getUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            await getCityName(latitude, longitude);
+          },
+          (error) => {
+            setError('Location access denied');
+          }
+        );
+      } else {
+        setError('Geolocation is not supported by this browser.');
+      }
+    };
+
+    getUserLocation();
+    fetchWeather();
+  },[]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fungsi untuk mendapatkan nama kota dari API menggunakan koordinat
+  const getCityName = async (lat, lon) => {
+    try {
+      // Menggunakan OpenWeatherMap API sebagai contoh
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`
+      );
+      const data = await response.json();
+      setCity(data.name); // Mengambil nama kota dari respons
+    } catch (error) {
+      setError('Failed to fetch city name');
+    }
+  };
+
+  const fetchWeather = async () => {
+    try {
+      const res = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+      );
+      setWeather(res.data);
+      getWeatherIcon(res.data.weather[0].main);
+      setError([]); // Clear error if request is successful
+    } catch (err) {
+      setError('City not found, please try again.');
+      setWeather([]); // Clear weather data if there's an error
+    }
+  };
+
+  // Panggil fetchWeather setiap kali `city` berubah
+  useEffect(() => {
+    if (city) {
+      fetchWeather();
+    }
+    // Hanya jalankan ketika `city` berubah
+  },[city]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setCity(searchQuery); // Ubah nilai `city` saat submit, bukan saat mengetik
+  };
+
+  // Function to map weather conditions to iconsf
+  const getWeatherIcon = (weatherMain) => {
+    switch (weatherMain) {
+      case 'Clear':
+        return clear;
+      case 'Clouds':
+        return clouds;
+      case 'Drizzle':
+        return drizzle;
+      case 'Thunderstorm':
+        return thunderstorm;
+      case 'Rain':
+        return rain;
+      case 'Snow':
+        return snow;
+      default:
+        return sunrise; // Fallback icon
+    }
+  };
+
+  const convertToMph = (speedInMps) => {
+    return (speedInMps * 2.237).toFixed(2); // Membulatkan hasil ke dua desimal
+  };
+
   return (
     <div className="relative w-screen h-screen">
       <Image
         src={weather2}
         layout="fill"
         objectFit="cover"
-        alt="Sky"
+        alt="weather"
         className="absolute inset-0 z-[-1]"
       />
       <main className="w-screen h-screen flex">
         <div className="bg-white/10 backdrop-blur-lg w-full h-full p-10 flex justify-center items-center">
           {/* Konten aplikasi di sini */}
-          {/* <h1 className="text-3xl text-black">Weather App</h1> */}
           <div className="relative">
             <Image
               src={weather2}
               objectFit="contain"
-              alt="Sky"
+              alt="weather"
               width={2000}
               className="inset-0 w-[1500px] h-[400px] object-cover rounded"
             />
             <div className="absolute top-5 left-5">
               <div className="flex w-full justify-between gap-5">
-              <input type="text" placeholder="Search locations" className="bg-transparent text-white text-3xl border-none outline-none placeholder-gray-400"/>
+                <form onSubmit={handleSearch} className="flex justify-center items-center gap-4">
+                  <input type="text"
+                    placeholder="Search locations"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent outline-none text-white text-3xl placeholder-gray-400"/>
+                  <button type="submit" className="border text-white px-4 py-2 rounded-lg">Search</button>
+                </form>
               </div>
             </div>
             {/* Current Location */}
@@ -36,64 +154,53 @@ export default function Home() {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
               </svg>
-              <h3 className="text-xl">Jakarta, IDN</h3>
-              <p className="text-xl">13:15</p>
+              <h3 className="text-xl">{weather.name}, {weather.sys ? weather.sys.country : ''}</h3>
             </div>
-            <div className="bg-white/20 backdrop-blur-xl flex w-full h-28 rounded-bl rounded-br flex-wrap divide-y md:flex-nowrap md:divide-x md:divide-y-0 overflow-auto">
-              <div className="w-2/6 flex justify-center items-center gap-5 p-4">
-                <div className="flex flex-col">
-                  <h1 className="text-center text-6xl text-white">82°</h1>
-                  <span className="bg-gray-400 rounded-full px-5 text-white">Monday 27th</span>
+            <div className="bg-white/20 backdrop-blur-xl flex w-full h-36 rounded-bl rounded-br flex-wrap divide-y md:flex-nowrap md:divide-x md:divide-y-0 overflow-auto">
+              <div className="w-2/6 flex justify-center items-center gap-8 p-4">
+                <div className="flex flex-col flex-shrink-0">
+                  <h1 className="text-center text-5xl font-normal text-white">{weather.main ? Math.round(weather.main.temp) : ''}<sup className="text-3xl">°C</sup></h1>
+                  <p className="capitalize text-white text-lg">Feels like: {weather.main ? Math.round(weather.main.feels_like) : ''} <sup className="text-sm">°C</sup></p>
                 </div>
-                <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-16 text-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-                  </svg>
-                  <p className="text-white text-sm font-semibold">4mph / 67°</p>
-                </div>
+                {weather && weather.weather && weather.weather.length > 0 && (
+                  <div className="flex flex-col flex-shrink-0 justify-center items-center">
+                    {/* Check if weather and weather.weather[0] exist before accessing them */}
+                    <Image
+                      src={getWeatherIcon(weather.weather[0].main)}
+                      alt={weather.weather[0].main}
+                      className="w-12"
+                      width={100}
+                      height={100}
+                    />
+                    <p className="capitalize text-white text-lg">{weather.weather ? weather.weather[0].description : ''}</p>
+                  </div>
+                )}
               </div>
               <div className="w-4/6 flex justify-between md:divide-x md:divide-y-0">
-                <div className="flex w-1/6 flex-col items-center justify-center gap-2">
-                  <span className="rounded-full px-3 py-1 bg-gray-400 uppercase text-xs text-white font-semibold">Tue</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
-                  </svg>
-                  <span className="text-white">28°</span>
+                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                  <span className="text-white">Min. Temp</span>
+                  <Image src={tempMin} className="w-10" alt="alt"/>
+                  <span className="text-white text-md font-semibold">{ weather.main ? Math.round(weather.main.temp_min) : '' } <sup className="text-md">°C</sup></span>
                 </div>
-                <div className="flex w-1/6 flex-col items-center justify-center gap-2">
-                  <span className="rounded-full px-3 py-1 bg-gray-400 uppercase text-xs text-white font-semibold">Wed</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
-                  </svg>
-                  <span className="text-white">28°</span>
+                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                  <span className="text-white">Max. Temp</span>
+                  <Image src={tempMax} className="w-10" alt="alt"/>
+                  <span className="text-white text-md font-semibold">{ weather.main ? Math.round(weather.main.temp_max) : '' } <sup className="text-md">°C</sup></span>
                 </div>
-                <div className="flex w-1/6 flex-col items-center justify-center gap-2">
-                  <span className="rounded-full px-3 py-1 bg-gray-400 uppercase text-xs text-white font-semibold">Thu</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
-                  </svg>
-                 <span className="text-white">28°</span>
+                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                  <span className="text-white">Wind</span>
+                  <Image src={wind} className="w-10" alt="alt"/>
+                  <span className="text-white text-md font-semibold">{weather.wind ? convertToMph(weather.wind.speed) : ''}mph / {weather.wind ? weather.wind.deg : ''}°</span>
                 </div>
-                <div className="flex w-1/6 flex-col items-center justify-center gap-2">
-                  <span className="rounded-full px-3 py-1 bg-gray-400 uppercase text-xs text-white font-semibold">Fri</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
-                  </svg>
-                 <span className="text-white">28°</span>
+                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                  <span className="text-white">Humidity</span>
+                  <Image src={humidity} className="w-10" alt="alt"/>
+                  <span className="text-white text-md font-semibold">{ weather.main ? weather.main.humidity : '' }%</span>
                 </div>
-                <div className="flex w-1/6 flex-col items-center justify-center gap-2">
-                  <span className="rounded-full px-3 py-1 bg-gray-400 uppercase text-xs text-white font-semibold">Sat</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
-                  </svg>
-                 <span className="text-white">28°</span>
-                </div>
-                <div className="flex w-1/6 flex-col items-center justify-center gap-2">
-                  <span className="rounded-full px-3 py-1 bg-gray-400 uppercase text-xs text-white font-semibold">Sun</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-white">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
-                  </svg>
-                 <span className="text-white">28°</span>
+                <div className="flex w-1/5 flex-col items-center justify-center gap-2">
+                  <span className="text-white">Visibility</span>
+                  <Image src={visibility} className="w-10" alt="alt"/>
+                  <span className="text-white text-md font-semibold">{ weather.main ? parseInt(weather.visibility / 1000) : '' } km</span>
                 </div>
              </div>
             </div>
