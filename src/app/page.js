@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import { useState, useEffect } from 'react';
-import sky from "../app/public/images/sky.jpg"
-import weather from "../app/public/images/weather1.jpg"
 import weather2 from "../app/public/images/weather2.jpg"
 import axios from "axios";
 import humidity from '../app/public/icons/humidity.svg'
