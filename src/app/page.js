@@ -133,7 +133,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative max-w-screen max-h-screen">
+    <div className="relative w-screen h-screen">
       <Image
         src={weather2}
         layout="fill"
@@ -141,25 +141,25 @@ export default function Home() {
         alt="weather"
         className="absolute inset-0 z-[-1]"
       />
-      <div className="absolute top-40 left-10 flex gap-5">
-      <form onSubmit={handleSearch} className="flex justify-between items-center gap-4">
-        <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent text-white outline-none border rounded-lg py-1 px-5 " placeholder="Search locations"/>
-        <button type="submit" className="text-white border rounded-lg px-5 py-1">Search</button>
-      </form>
+      <div className="absolute md:hidden top-16 z-10 left-10 flex gap-5">
+        <form onSubmit={handleSearch} className="flex justify-between items-center gap-4">
+          <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent text-white outline-none border rounded-lg py-1 px-5 " placeholder="Search locations"/>
+          <button type="submit" className="text-white border rounded-lg px-5 py-1">Search</button>
+        </form>
       </div>
       <main className="w-screen h-screen flex">
         <div className="md:bg-white/10 md:backdrop-blur-lg w-full h-full p-10 flex justify-center items-center">
           {/* Konten aplikasi di sini */}
-          <div className="relative">
+          <div className="relative md:top-[-40px] h-[80%]">
             <Image
               src={weather2}
               objectFit="contain"
               alt="weather"
               width={2000}
-              className="inset-0 w-[1500px] h-[400px] object-cover rounded"
+              className="inset-0 w-[1500px] h-full md:h-[400px] object-cover rounded"
             />
             <div className="absolute hidden md:flex z-10 top-5 left-5">
-              <div className="flex w-screen justify-between gap-5">
+              <div className="flex justify-between gap-5">
                 <form onSubmit={handleSearch} className="flex justify-between items-center gap-4">
                   <input type="text"
                     placeholder="Search locations"
@@ -183,7 +183,6 @@ export default function Home() {
               <div className="md:w-2/6 md:mt-0 mt-16 flex justify-center items-center gap-8 p-4">
               {/* <FadeInSection> */}
               <div className="absolute flex gap-2 items-center top-10 md:hidden text-white text-center">
-                {/* <h1 className="font-semibold text-lg">My location</h1> */}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 md:size-12 text-white text-right">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
