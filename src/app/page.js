@@ -141,7 +141,7 @@ export default function Home() {
         alt="weather"
         className="absolute inset-0 z-[-1]"
       />
-      <div className="absolute top-10 left-44 flex gap-5">
+      <div className="absolute top-40 left-10 flex gap-5">
       <form onSubmit={handleSearch} className="flex justify-between items-center gap-4">
         <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent text-white outline-none border rounded-lg py-1 px-5 " placeholder="Search locations"/>
         <button type="submit" className="text-white border rounded-lg px-5 py-1">Search</button>
