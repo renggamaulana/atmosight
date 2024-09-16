@@ -133,7 +133,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative w-screen h-screen">
+    <div className="relative max-w-screen max-h-screen">
       <Image
         src={weather2}
         layout="fill"
@@ -141,8 +141,14 @@ export default function Home() {
         alt="weather"
         className="absolute inset-0 z-[-1]"
       />
+      <div className="absolute top-10 left-44 flex gap-5">
+      <form onSubmit={handleSearch} className="flex justify-between items-center gap-4">
+        <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent text-white outline-none border rounded-lg py-1 px-5 " placeholder="Search locations"/>
+        <button type="submit" className="text-white border rounded-lg px-5 py-1">Search</button>
+      </form>
+      </div>
       <main className="w-screen h-screen flex">
-        <div className="bg-white/10 backdrop-blur-lg w-full h-full p-10 flex justify-center items-center">
+        <div className="md:bg-white/10 md:backdrop-blur-lg w-full h-full p-10 flex justify-center items-center">
           {/* Konten aplikasi di sini */}
           <div className="relative">
             <Image
@@ -152,7 +158,7 @@ export default function Home() {
               width={2000}
               className="inset-0 w-[1500px] h-[400px] object-cover rounded"
             />
-            <div className="absolute z-10 top-5 left-5">
+            <div className="absolute hidden md:flex z-10 top-5 left-5">
               <div className="flex w-screen justify-between gap-5">
                 <form onSubmit={handleSearch} className="flex justify-between items-center gap-4">
                   <input type="text"
@@ -165,7 +171,7 @@ export default function Home() {
               </div>
             </div>
             {/* Current Location */}
-            <div className="absolute top-10 right-10 text-white flex flex-col justify-center">
+            <div className="absolute top-10 right-10 text-white hidden md:flex flex-col justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 md:size-12 text-white text-right">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
@@ -173,10 +179,18 @@ export default function Home() {
               <h3 className="text-xl">{weather.name}, {weather.sys ? weather.sys.country : ''}</h3>
             </div>
             {/* Weather Details */}
-            <div className="bg-white/20 md:backdrop-blur-xl absolute top-0 md:relative h-full flex md:flex-row flex-col items-center w-full md:h-36 rounded-bl rounded-br divide-y md:divide-x md:divide-y-0 overflow-y-auto">
+            <div className="md:bg-white/20 md:backdrop-blur-xl backdrop-blur-sm absolute top-0 md:relative h-full flex md:flex-row flex-col items-center w-full md:h-36 rounded-bl rounded-br divide-y md:divide-x md:divide-y-0 overflow-y-auto">
               <div className="md:w-2/6 md:mt-0 mt-16 flex justify-center items-center gap-8 p-4">
               {/* <FadeInSection> */}
-                <div className="md:flex-row flex-col flex gap-4">
+              <div className="absolute flex gap-2 items-center top-10 md:hidden text-white text-center">
+                {/* <h1 className="font-semibold text-lg">My location</h1> */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 md:size-12 text-white text-right">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                </svg>
+                <p className="text-xl font-semibold">{weather.name}, {weather.sys ? weather.sys.country : ''}</p>
+              </div>
+                <div className="md:flex-row flex-col-reverse flex gap-4">
                   <div className="w-[150px] text-center flex justify-center flex-col flex-shrink-0">
                     <h1 className="text-center text-5xl font-normal text-white">{weather.main ? Math.round(weather.main.temp) : ''}<sup className="text-3xl">°C</sup></h1>
                     <p className="capitalize text-white text-lg">Feels like: {weather.main ? Math.round(weather.main.feels_like) : ''} <sup className="text-sm">°C</sup></p>
@@ -197,31 +211,31 @@ export default function Home() {
                 </div>
               {/* </FadeInSection> */}
               </div>
-              <div className="md:w-4/6 w-full md:flex grid grid-cols-2 place-items-center gap-5 flex-col md:flex-row items-center justify-between md:divide-x md:divide-y-0">
+              <div className="md:w-4/6 w-[355px] grid grid-cols-2 py-5 gap-8 md:gap-0 place-items-center md:flex md:divide-x md:divide-y-0">
                 <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
-                  <span className="text-white">Min. Temp</span>
+                  <span className="text-white font-normal">Min. Temp</span>
                   <Image src={tempMin} className="w-10" alt="alt"/>
-                  <span className="text-white text-md font-semibold">{ weather.main ? Math.round(weather.main.temp_min) : '' } <sup className="text-md">°C</sup></span>
+                  <span className="text-white text-md font-normal">{ weather.main ? Math.round(weather.main.temp_min) : '' } <sup className="text-md">°C</sup></span>
                 </div>
                 <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
-                  <span className="text-white">Max. Temp</span>
+                  <span className="text-white font-normal">Max. Temp</span>
                   <Image src={tempMax} className="w-10" alt="alt"/>
-                  <span className="text-white text-md font-semibold">{ weather.main ? Math.round(weather.main.temp_max) : '' } <sup className="text-md">°C</sup></span>
+                  <span className="text-white text-md font-normal">{ weather.main ? Math.round(weather.main.temp_max) : '' } <sup className="text-md">°C</sup></span>
                 </div>
                 <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
-                  <span className="text-white">Wind</span>
+                  <span className="text-white font-normal">Wind</span>
                   <Image src={wind} className="w-10" alt="alt"/>
-                  <span className="text-white text-md font-semibold">{weather.wind ? convertToMph(weather.wind.speed) : ''}mph / {weather.wind ? weather.wind.deg : ''}°</span>
+                  <span className="text-white text-md whitespace-nowrap font-normal">{weather.wind ? convertToMph(weather.wind.speed) : ''}mph / {weather.wind ? weather.wind.deg : ''}°</span>
                 </div>
                 <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
-                  <span className="text-white">Humidity</span>
+                  <span className="text-white font-normal">Humidity</span>
                   <Image src={humidity} className="w-10" alt="alt"/>
-                  <span className="text-white text-md font-semibold">{ weather.main ? weather.main.humidity : '' }%</span>
+                  <span className="text-white text-md font-normal">{ weather.main ? weather.main.humidity : '' }%</span>
                 </div>
                 <div className="flex w-1/2 flex-nowrap md:w-1/5 flex-col items-center justify-center gap-2">
-                  <span className="text-white">Visibility</span>
+                  <span className="text-white font-normal">Visibility</span>
                   <Image src={visibility} className="w-10" alt="alt"/>
-                  <span className="text-white text-md font-semibold">{ weather.main ? parseInt(weather.visibility / 1000) : '' } km</span>
+                  <span className="text-white text-md font-normal">{ weather.main ? parseInt(weather.visibility / 1000) : '' } km</span>
                 </div>
              </div>
             </div>
